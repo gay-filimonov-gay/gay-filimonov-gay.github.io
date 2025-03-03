@@ -1,238 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | HTML5 Simple</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">HTML5 Simple</div>
+      </div>
+    </div>
+    <script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="ИИ-ассистент для учёбы 📚✍📜">
-    <meta property="og:description" content="Пригодится для сокращения и перефразирования текстов">
-    <meta property="og:image" content="ogimg.jpg">
-    <link rel="stylesheet" href="stylelikeaclown.css">
-    <link rel="stylesheet" href="containers.css">
-    <link rel="stylesheet" href="boba.css">
-    <link rel="stylesheet" href="navy.css">
-    <link rel="icon" href="1488.ico" type="image/x-icon">
-    <title>ИИ-ассистент</title>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/HTML5 SAMPLE TESAK.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/HTML5 SAMPLE TESAK.data.unityweb",
+        frameworkUrl: buildUrl + "/HTML5 SAMPLE TESAK.framework.js.unityweb",
+        codeUrl: buildUrl + "/HTML5 SAMPLE TESAK.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "HTML5 Simple",
+        productVersion: "0.1",
+        showBanner: unityShowBanner,
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
 
 
-    <script type="text/javascript">
-        (function (m, e, t, r, i, k, a) {
-            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-            m[i].l = 1 * new Date();
-            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
-            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-        })
-            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
-        ym(99466752, "init", {
-            clickmap: true,
-            trackLinks: true,
-            accurateTrackBounce: true,
-            webvisor: true
-        });
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
     </script>
-    <noscript>
-        <div><img src="https://mc.yandex.ru/watch/99466752" style="position:absolute; left:-9999px;" alt="" /></div>
-    </noscript>
-</head>
-<body class="light">
-    <div id="preload">
-        <div id="pre1"></div>
-        <div id="pre2"></div>
-        <div id="pre3"></div>
-        <div id="pre4"></div>
-        <div id="pre5"></div>
-        <div id="pre6"></div>
-    </div>
-    <div id="bg"></div>
-
-
-    <div class="center" id="contacts-center">
-        <div id="contacts-div" class="borderus">
-            <!--vvv Тута контакты vvv-->
-            <div id="close-contacts-button" onclick="close_contacts()">Закрыть</div>
-            <h1>Контакты</h1>
-            <div class="kontakts"><img src="Logo.png" style="height: 84px; width: 84px;"><a
-                    href="https://t.me/TrueClowen">
-                    <h2>Telegram</h2>
-                </a></div>
-            <div class="kontakts"><img src="VK Logo.png" style="height: 84px; width: 84px;"><a
-                    href="https://vk.com/iolipa">
-                    <h2>Vkontakte</h2>
-                </a></div>
-            <!--^^^ Тута контакты ^^^-->
-        </div>
-    </div>
-    <div class="center" id="auth-center">
-        <div id="auth-div" class="borderus">
-            <!--vvv Тута интефейс входа vvv-->
-            <div id="close-auth-button" onclick="close_auth()">Закрыть</div>
-            <h1>Войти</h1>
-            <div>
-                <h2>Введите email</h2>
-                <input class="borderus vhod" type="email" />
-            </div>
-            <div>
-                <h2>Введите пароль</h2>
-                <input id="password" class="borderus vhod" type="password">
-                <img id="shownes" src="sdvg\EyeClosed.svg" onclick="passwording()">
-            </div>
-            <button class="borderus shadowus"
-                style="padding: 10px; margin-top: 20px; font-size: 18px;">Продолжить</button>
-            <!--^^^ До сюда ^^^-->
-        </div>
-    </div>
-    <div class="center" id="guide-center">
-        <div id="guide-div" class="borderus text" style="height: 70%; width: 60%; overflow-y: scroll;">
-            <div id="close-guide-button" onclick="close_guide()">Закрыть</div>
-            <h1>Как пользоваться сайтом:</h1>
-            <ol>
-                <li>Ввести текст, который вы хотите сократить или перефразировать, в левую панель (голубого цвета).</li>
-                <li>Выбрать, насколько вы хотите сократить текст (выбирать с помощью ползунка), если вы хотите сократить
-                    текст. Иначе можете пропустить данный пункт.</li>
-                <li>Нажать стрелочку (для сокращения текста) или кнопку «Перефразировать» (для перефразирования текста).
-                </li>
-            </ol>
-            <h1>Дополнительные функции (кнопки под полями):</h1>
-            <ol>
-                <li>Озвучивание текста</li>
-                <li>Выбор видео или аудио файла для распознавания речи</li>
-                <li>Вставить случайный текст из базы ОГЭ</li>
-                <li>Удалить текст из поля</li>
-                <li>Копировать текст из поля</li>
-            </ol>
-            <h1>Выбор модели:</h1>
-            <p style="text-align: left;">Вы можете выбрать одну из двух предложенный моделей нейросети</p>
-            <h1>Остальные настройки:</h1>
-            <ol>
-                <li>Выбор модели при помощи кнопки посередине</li>
-                <li>Выбор темы (светлая или тёмная)</li>
-            </ol>
-            <h1>Прочие функции:</h1>
-            <ol>
-                <li>Сохранение истории запросов (автоматически)</li>
-            </ol>
-        </div>
-    </div>
-    <header class="borderus shapka hoverus">
-        <div id="shapka-vniz">
-            <h1 onclick="open_contacts()">Контакты</h1>
-            <h1>Github</h1>
-            <h1 onclick="open_auth()">Вход Регистрация</h1>
-            <div class="header-theme-container">
-                <p id="theme-z">Тема</p>
-                <span>Светлая</span>
-                <label class="toggle">
-                    <input type="checkbox" id="theme_input">
-                    <div class="toggler" onclick="squid_theme()"></div>
-                </label>
-                <span>Тёмная</span>
-            </div>
-        </div>
-        <div class="header-line">
-            <img class="header-line-img" src="sdvg\Menu.svg">
-            <div id="name">
-                <h1 class="hh">ИИ-ассистент для учёбы</h1>
-                <img id="title_image" src="sdvg/QuestionCircleOutlined.svg" onclick="open_guide()">
-            </div>
-            <img class="header-line-img" src="sdvg\RoundLogin.svg">
-        </div>
-    </header>
-
-
-
-    <div class="line-container main">
-        <div class="column-container">
-            <textarea class="text borderus shadowus" id="left" placeholder="Введите текст..."></textarea>
-            <div class="borderus checking_files shadowus" id="file"><img
-                    src="https://ssl.gstatic.com/translate/drag_and_drop.png" aria-hidden="true" class="photo" alt="">
-                <h2>Перетащите сюда файл</h2>
-                <h2 id="tipassilka" onclick="fileokno()"><u>или выберите с устройства</u></h2>
-                <input type="file" id="fileinput" accept=".wav">
-                <button id="confirm_button" onclick="uploadwav()">Отправить файл</button>
-            </div>
-            <div class="button-container">
-                <div class="hover-btn-cont"><button class="all-button" id="button1" title="Озвучить текст"
-                        onclick="speakText1()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button2" title="Выбрать файл"
-                        onclick="files()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button3" title="Случайный текст"
-                        onclick="random_text()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button4" title="Удалить"
-                        onclick="del()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button5" title="Копировать"
-                        onclick="copyy()"></button></div>
-            </div>
-        </div>
-
-
-        <!-- Серединка -->
-        <div class="column-container" id="middle">
-            <div class="line-container shadowus middle-button borderus sokr-container">
-                <button class="left-button sokr_knopka">
-                    <h2>Сократить текст на <input oninput="sync1()" class="borderus" type="number" id="number" min=10
-                            max=90 value="52" readonly> %</h2><br>
-                    <input oninput="sync2()" type="range" id="range" step="5" min=10 max=90 value="52">
-                </button>
-
-                <button class="right-button sokr_knopka" id="sent" onclick="apisokr()">
-                </button>
-            </div>
-
-
-            <button id="perefrazirovatt" class="middle-button borderus shadowus active" onclick="apiper()">
-                <h2>Перефразировать</h2>
-            </button>
-            <div class="borderus shadowus">
-                <div class="dropdown">
-                    <button class="dropbtn" onclick="myFunction()">
-                        <h2 class="dropbtn" id="modelname">Выпадающий</h2>
-                    </button>
-                    <div id="myDropdown" class="dropdown-content">
-                        <div class="mod" onclick="set_mod1()">
-                            <div class="circle" id="cir1"></div>
-                            <h3 style="padding-inline: 10px;">QwQ-32B-Preview</h3>
-                        </div>
-                        <div class="mod" onclick="set_mod2()">
-                            <div class="circle" id="cir2"></div>
-                            <h3 style="padding-inline: 10px;">Qwen2.5-0.5B</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
-        <div class="column-container">
-            <textarea class="text borderus shadowus" id="right" readonly placeholder="Ответ ИИ..."></textarea>
-            <div class="button-container">
-                <div class="hover-btn-cont"><button class="all-button" id="button7" title="Копировать"
-                        onclick="copyy2()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button6" title="Озвучить текст"
-                        onclick="speakText2()"></button></div>
-                <div class="hover-btn-cont"><button class="all-button" id="button8" title="Шпаргалка"
-                        onclick=""></button></div>
-            </div>
-        </div>
-    </div>
-    <div class="history_container">
-        <h1>История запросов</h1>
-        <button onclick="history_clear()" class="borderus active shadowus middle-button">
-            <h1>Очистить</h1>
-        </button>
-        <div id="history">
-            <div class="article active shadowus middle-button borderus" onclick="history_paste(this)">
-                <img src="sdvg/Edit16Filled.svg">
-                Иметь семью и детей так же необходимо и естественно, как необходимо и естественно трудиться. Семья издавна скреплялась нравственным авторитетом отца, который традиционно считался главой. Отца дети уважали и слушались. Он занимался сельхозработами, строительством, заготовкой леса и дров. Всю тяжесть крестьянского труда с ним разделяли взрослые сыновья. Руководство домашним хозяйством было в руках жены и матери. Она ведала всем в доме: присматривала за скотом, заботилась о питании, об одежде. Все эти работы она делала не одна: даже дети, едва научившись ходить, понемногу, вместе с игрой, начинали делать что-то полезное. Доброта, терпимость, взаимное прощение обид перерастали в хорошей семье во взаимную любовь. Сварливость и неуживчивость считались наказанием судьбы и вызывали жалость к их носителям. Надо было уметь уступить, забыть обиду, ответить добром или промолчать. Любовь и согласие между родственниками давали начало любви за пределами дома. От человека, не любящего и не уважающего своих родных, трудно ждать уважения к другим людям.
-                <div class="shadow-down"></div>
-                <button class="history_down_btn" onclick="history_down(this)"></button>
-            </div>
-        </div>
-    </div>
-    <script src="whatisjs.js"></script>
-    <script src="sss.js"></script>
-    <script src="random_text.js"></script>
-</body>
-
+  </body>
 </html>
